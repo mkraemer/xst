@@ -126,6 +126,7 @@ static Shortcut shortcuts[] = {
 	{ MODKEY|ShiftMask,     XK_V,           clippaste,      {.i =  0} },
 	{ MODKEY,               XK_Num_Lock,    numlock,        {.i =  0} },
 	{ MODKEY,               'u',            externalpipe,   {.v = "xurls | eval dmenu $(dmenu_options) | xargs -r $BROWSER" } },
+	{ ControlMask|ShiftMask,XK_U,           iso14755,       {.i =  0} },
 };
 
 

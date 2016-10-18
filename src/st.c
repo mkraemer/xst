@@ -88,6 +88,9 @@ char *argv0;
 #define TRUEGREEN(x)		(((x) & 0xff00))
 #define TRUEBLUE(x)		(((x) & 0xff) << 8)
 
+/* constants */
+#define ISO14755CMD		"dmenu -fn terminus:style=regular:pixelsize=12 -p codepoint: </dev/null"
+
 #define XRESOURCE_LOAD_META(NAME)                                  \
 	if(!XrmGetResource(xrdb, "st." NAME, "st." NAME, &type, &ret)) \
 		XrmGetResource(xrdb, "*." NAME, "*." NAME, &type, &ret);   \
@@ -356,6 +359,7 @@ static void xzoomabs(const Arg *);
 static void xzoomreset(const Arg *);
 static void printsel(const Arg *);
 static void printscreen(const Arg *) ;
+static void iso14755(const Arg *);
 static void toggleprinter(const Arg *);
 static void sendbreak(const Arg *);
 static void externalpipe(const Arg *);
@@ -2640,6 +2644,30 @@ tprinter(char *s, size_t len)
 		close(iofd);
 		iofd = -1;
 	}
+}
+
+void
+iso14755(const Arg *arg)
+{
+	char cmd[sizeof(ISO14755CMD)];
+	FILE *p;
+	char *us, *e, codepoint[9], uc[UTF_SIZ];
+	unsigned long utf32;
+
+	snprintf(cmd, sizeof(cmd), ISO14755CMD);
+	if (!(p = popen(cmd, "r")))
+		return;
+
+	us = fgets(codepoint, sizeof(codepoint), p);
+	pclose(p);
+
+	if (!us || *us == '\0' || *us == '-' || strlen(us) > 7)
+		return;
+	if ((utf32 = strtoul(us, &e, 16)) == ULONG_MAX ||
+	    (*e != '\n' && *e != '\0'))
+		return;
+
+	ttysend(uc, utf8encode(utf32, uc));
 }
 
 void
